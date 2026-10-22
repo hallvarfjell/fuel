@@ -1,85 +1,15 @@
-<!doctype html>
-<html lang="no">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#064e3b">
-  <meta name="description" content="Planlegg energi, væske og elektrolytter for utholdenhetsøkter og konkurranser.">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
-  <title>Endurance Fuel Planner</title>
-</head>
-<body>
-<header class="topbar">
-  <div><h1>Endurance Fuel Planner</h1><p>Økt, konkurranse og døgnenergi</p></div>
-  <div class="header-actions"><button id="installBtn" hidden>Installer</button><button id="exportBtn">Eksporter</button><label class="button">Importer<input id="importFile" type="file" accept="application/json" hidden></label></div>
-</header>
-<nav class="tabs" aria-label="Hovedmeny">
-  <button data-page="strategy" class="active">Strategi</button>
-  <button data-page="products">Produkter</button>
-  <button data-page="schedule">Inntaksplan</button>
-  <button data-page="analysis">Analyse</button>
-  <button data-page="day">Døgnmodell</button>
-</nav>
-<main>
-  <aside class="notice"><strong>Planleggingsverktøy:</strong> Beregningene er estimater, ikke medisinsk rådgivning. Test ernæringsstrategien gradvis på trening, og unngå å drikke mer enn svettetapet. Søk faglig hjelp ved sykdom, medisinbruk eller tidligere problemer med væske-/saltbalanse.</aside>
-
-  <section id="strategy" class="page active">
-    <div class="grid two">
-      <article class="card">
-        <h2>Utøver og modell</h2>
-        <div class="form-grid">
-          <label>Kroppsvekt <span><input id="weight" type="number" min="30" max="250" step="0.1"> kg</span></label>
-          <label>Startlager glykogen <span><input id="startGlycogen" type="number" min="100" max="1000"> g</span></label>
-          <label>Utnyttbar andel <span><input id="usableGlycogen" type="number" min="40" max="100"> %</span></label>
-          <label>Maks. karbohydratopptak <span><input id="absorption" type="number" min="20" max="150"> g/t</span></label>
-          <label>Svetterate <span><input id="sweatRate" type="number" min="0.1" max="3" step="0.05"> L/t</span></label>
-          <label>Natrium i svette <span><input id="sweatSodium" type="number" min="100" max="2500"> mg/L</span></label>
-          <label>Temperatur <span><input id="temperature" type="number" min="-20" max="50"> °C</span></label>
-          <label>Væskeerstatning <span><input id="fluidReplace" type="number" min="30" max="100"> %</span></label>
-        </div>
-        <p class="help">Glykogenlager, svetterate og opptak kan overstyres. Kjønn og alder er ikke nødvendige i selve øktmodellen.</p>
-      </article>
-      <article class="card">
-        <div class="row between"><div><h2>Økt eller konkurranse</h2><p class="help">Standard: halvmaraton i konkurransefart.</p></div><button id="addSegment">+ Øktdel</button></div>
-        <label>Navn på planen <input id="planName" type="text"></label>
-        <div id="segments"></div>
-        <div class="row wrap"><button id="savePlan" class="primary">Lagre plan</button><select id="savedPlans"></select><button id="loadPlan">Last inn</button><button id="deletePlan" class="danger">Slett</button></div>
-      </article>
-    </div>
-  </section>
-
-  <section id="products" class="page">
-    <article class="card"><div class="row between"><div><h2>Produkter</h2><p class="help">Legg inn verdiene per gel, flaske, bar eller annen porsjon.</p></div><button id="addProduct">+ Produkt</button></div><div id="productsList" class="product-grid"></div></article>
-  </section>
-
-  <section id="schedule" class="page">
-    <article class="card"><div class="row between"><div><h2>Inntaksplan</h2><p class="help">Tidspunkt regnes fra start. Inntak vises i energigrafen.</p></div><button id="autoSchedule">Lag forslag</button></div><div id="intakes"></div><button id="addIntake">+ Inntak</button></article>
-  </section>
-
-  <section id="analysis" class="page">
-    <div id="warnings"></div><div id="summary" class="summary-grid"></div>
-    <article class="card"><h2>Tilgjengelig karbohydrat gjennom økten</h2><canvas id="fuelChart" width="1100" height="400"></canvas><div class="legend"><span class="green">● Tilgjengelig lager</span><span class="orange">● Inntak</span><span class="red">● Kritisk nivå</span></div><p class="help">Inntatt karbohydrat går først til en mage-/opptakskø. Maksimalt opptak per time begrenser hvor raskt det blir tilgjengelig.</p></article>
-    <article class="card"><h2>Delresultater</h2><div class="table-wrap"><table><thead><tr><th>Del</th><th>Tid</th><th>Energi</th><th>Karbohydrat</th><th>Væsketap</th><th>Natriumtap</th></tr></thead><tbody id="segmentResults"></tbody></table></div></article>
-  </section>
-
-  <section id="day" class="page">
-    <div class="grid two">
-      <article class="card"><h2>Døgnmodell</h2><p class="help">Separat oversikt som henter energi fra den aktive treningsplanen og egne hverdagsaktiviteter.</p>
-        <div class="form-grid">
-          <label>Hvileenergi/RMR <span><input id="rmr" type="number" min="800" max="4000"> kcal/døgn</span></label>
-          <label>Matens termiske effekt <span><input id="tef" type="number" min="0" max="20"> %</span></label>
-          <label>Ta med aktiv treningsplan <span><input id="includeWorkout" type="checkbox"></span></label>
-        </div>
-        <p class="help">RMR legges inn direkte for å unngå at kjønn eller en bestemt formel blir et krav. Bruk målt verdi eller et eksternt estimat.</p>
-      </article>
-      <article class="card"><div class="row between"><div><h2>Hverdagsaktiviteter</h2><p class="help">MET × kroppsvekt × tid gir estimert total aktivitetenergi.</p></div><button id="addDaily">+ Aktivitet</button></div><div id="dailyActivities"></div></article>
-    </div>
-    <div id="daySummary" class="summary-grid"></div>
-    <article class="card"><h2>Døgnets energikomponenter</h2><canvas id="dayChart" width="1100" height="320"></canvas></article>
-  </section>
-</main>
-<footer>Kjører lokalt og lagrer data på enheten. Versjon 1.0.</footer>
-<script src="app.js"></script>
-</body></html>
+<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#064e3b"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="stylesheet" href="styles.css"><title>Endurance Fuel Planner</title></head><body>
+<header><div><h1>Endurance Fuel Planner</h1><p>Ernæringsstrategi for trening og konkurranse</p></div><div class="actions"><button id="install" hidden>Installer</button><button id="export">Eksporter</button><label class="btn">Importer<input id="import" type="file" accept="application/json" hidden></label></div></header>
+<nav id="tabs"><button data-page="strategy" class="active">Strategi</button><button data-page="products">Produkter</button><button data-page="intake">Inntaksplan</button><button data-page="analysis">Analyse</button><button data-page="day">Døgnmodell</button><button data-page="help">Hjelp og grunnlag</button></nav><main>
+<section id="strategy" class="page active"><div class="cols"><article class="card"><h2>Utøver og modell</h2><div class="form2"><label>Kroppsvekt, kg<input id="weight" type="number"></label><label>Maksimal hjertefrekvens, bpm<input id="maxHR" type="number"></label><label>Startlager glykogen, g<input id="glycogen" type="number"></label><label>Utnyttbar andel, %<input id="usable" type="number"></label><label>Maks. karbohydratopptak, g/t<input id="absorption" type="number"></label><label>Svetterate, L/t<input id="sweat" type="number" step=".05"></label><label>Natrium i svette, mg/L<input id="sweatNa" type="number"></label><label>Væskeerstatning, %<input id="replace" type="number"></label></div><p class="hint">Intensitet oppgis som prosent av maksimal hjertefrekvens (% HRmaks). MET foreslås automatisk fra aktivitet og intensitet, men kan overstyres.</p></article>
+<article class="card"><div class="split"><div><h2>Økt eller konkurranse</h2><p class="hint">Planen lagrer øktdeler og ernæringsstrategi samlet.</p></div><button id="addSeg">+ Øktdel</button></div><label>Plannavn<input id="planName"></label><div id="segments"></div><div class="actions"><button id="savePlan" class="primary">Lagre plan</button><select id="plans"></select><button id="loadPlan">Last inn</button><button id="deletePlan" class="danger">Slett</button></div></article></div></section>
+<section id="products" class="page"><article class="card"><div class="split"><div><h2>Lokal produktdatabase</h2><p class="hint">Standardproduktene er forhåndsutfylt. Kontroller alltid emballasjen, siden oppskrifter kan endres.</p></div><button id="addProduct">+ Eget produkt</button></div><input id="productSearch" placeholder="Søk etter produkt"><div id="productList" class="productGrid"></div></article></section>
+<section id="intake" class="page"><div class="split card"><div><h2>Inntaksplan per disiplin</h2><p class="hint">Svøm er sperret for inntak som standard. Hver flis viser bare inntak i den aktuelle øktdelen.</p></div></div><div id="disciplineCards"></div></section>
+<section id="analysis" class="page"><div id="alerts"></div><div id="summary" class="summary"></div><article class="card"><div class="split"><h2>Energi-, væske- og natriumbudsjett</h2><div id="toggles"><label><input type="checkbox" data-line="carb" checked> Karbohydrat</label><label><input type="checkbox" data-line="fluid" checked> Væske</label><label><input type="checkbox" data-line="sodium" checked> Natrium</label></div></div><canvas id="chart" width="1200" height="500"></canvas><p class="hint">Kurvene bruker hver sin normaliserte skala fra 0–100 %. Hold pekeren over grafen for verdier. Stiplede markører viser inntak.</p></article><article class="card"><h2>Resultat per øktdel</h2><div class="scroll"><table><thead><tr><th>Del</th><th>Tid</th><th>Energi</th><th>Karbohydrat brukt</th><th>Væsketap</th><th>Natriumtap</th></tr></thead><tbody id="partRows"></tbody></table></div></article></section>
+<section id="day" class="page"><div class="cols"><article class="card"><h2>Døgnmodell</h2><div class="form2"><label>Hvileenergi/RMR, kcal<input id="rmr" type="number"></label><label>Matens termiske effekt, %<input id="tef" type="number"></label><label><input id="includeWorkout" type="checkbox"> Ta med valgt treningsplan</label></div></article><article class="card"><div class="split"><h2>Hverdagsaktiviteter</h2><button id="addDaily">+ Aktivitet</button></div><div id="daily"></div></article></div><div id="daySummary" class="summary"></div></section>
+<section id="help" class="page"><article class="card prose"><h2>Hjelp, forkortelser og beregningsgrunnlag</h2><h3>Slik brukes appen</h3><ol><li>Opprett eller last inn en plan under <b>Strategi</b>.</li><li>Legg inn øktdeler. Intensitet er <b>% av HRmaks</b>. Forslag til MET oppdateres når aktivitet eller intensitet endres.</li><li>Kontroller produkter og næringsverdier.</li><li>Lag ernæringsplan separat for hver disiplin. Du kan opprette gjentatte inntak og flytte dem med dra-og-slipp.</li><li>Se samlet karbohydrat-, væske- og natriumbudsjett under Analyse.</li></ol>
+<h3>Forkortelser</h3><dl><dt>MET</dt><dd>Metabolic Equivalent of Task. 1 MET tilsvarer omtrent energiforbruk i hvile. Appen bruker MET × 3,5 × kroppsvekt / 200 for å estimere kcal per minutt.</dd><dt>HRmaks</dt><dd>Maksimal hjertefrekvens. Intensitet i appen angis som prosent av selvoppgitt HRmaks.</dd><dt>bpm</dt><dd>Beats per minute, altså hjerteslag per minutt.</dd><dt>RMR</dt><dd>Resting Metabolic Rate, hvileenergi per døgn.</dd><dt>GI</dt><dd>Gastrointestinal, knyttet til mage og tarm.</dd><dt>CHO</dt><dd>Carbohydrate, altså karbohydrat.</dd><dt>Na</dt><dd>Natrium. Salt er ikke det samme som natrium; natriumklorid består bare delvis av natrium.</dd><dt>kcal</dt><dd>Kilokalori, en enhet for energi.</dd><dt>g/t</dt><dd>Gram per time.</dd><dt>mg/L</dt><dd>Milligram per liter.</dd><dt>PWA</dt><dd>Progressive Web App, en nettside som kan installeres og brukes offline.</dd></dl>
+<h3>Mage-/opptakskø</h3><p>Når du registrerer en gel eller drikk, blir karbohydratet først lagt i en beregnet kø i mage/tarm. Hvert minutt flyttes maksimalt valgt <b>karbohydratopptak i g/t ÷ 60</b> fra køen til tilgjengelig energi. Overskudd blir liggende i køen til senere minutter. Modellen sier ikke at mat fysisk ligger ufordøyd i en bestemt tid; køen er en enkel matematisk begrensning som hindrer at hele gelen blir tilgjengelig øyeblikkelig. Stor kø ved mål utløser varsel og kan indikere en urealistisk plan eller GI-risiko.</p>
+<h3>Viktige modellvalg</h3><ul><li>Total aktivitetenergi estimeres fra MET og kroppsvekt.</li><li>Karbohydratandelen øker med % HRmaks, fra lavere andel ved lett arbeid til omtrent 95 % ved 80 % HRmaks eller mer. Dette er en forenkling, ikke en laboratoriemåling.</li><li>Væsketap = svetterate × tid. Mål for erstatning styres av angitt prosent.</li><li>Natriumtap = væsketap × natriumkonsentrasjon i svette.</li><li>Kalium og magnesium summeres fra produkter, men appen setter ikke et automatisk erstatningsmål under aktivitet.</li></ul>
+<h3>Kilder</h3><ul><li><a href="https://www.nih.no/om/aktuelt/bloggen/2023/hva-bruker-vi-mest-energi-pa-i-hverdagen.html" target="_blank">Norges idrettshøgskole: energi, MET, intensitet og glykogen</a></li><li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6628334/" target="_blank">Review: Nutrition and Supplement Update for the Endurance Athlete</a></li><li><a href="https://www.sportgeneeskunde.com/wp-content/uploads/ACSM-Position-Stand-Excercise-and-fluid-replacement.pdf" target="_blank">ACSM: Exercise and Fluid Replacement</a></li><li><a href="https://journals.humankinetics.com/view/journals/ijsnem/29/2/article-p73.xml" target="_blank">IAAF/World Athletics Consensus Statement on Nutrition</a></li><li><a href="https://fdc.nal.usda.gov/" target="_blank">USDA FoodData Central: banan og mørk sjokolade</a></li></ul><h3>Ansvarsavgrensning</h3><p>Dette er et planleggingsverktøy, ikke medisinsk rådgivning. Test planen på trening. Unngå å drikke mer enn svettetapet. Ved sykdom, medisinbruk, diabetes, nyre-/hjertesykdom eller tidligere hyponatremi bør planen vurderes av kvalifisert helsepersonell.</p></article></section>
+</main><dialog id="disclaimer"><h2>Før du starter</h2><p>Dette er et planleggingsverktøy, ikke medisinsk rådgivning. Beregningene er estimater og må testes individuelt på trening.</p><button id="accept" class="primary">Jeg forstår</button></dialog><footer>Data lagres lokalt på enheten · v2.0</footer><script src="app.js"></script></body></html>
