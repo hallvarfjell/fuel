@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#064e3b">
+  <meta name="description" content="Planlegg energi, væske og elektrolytter for utholdenhetsøkter og konkurranser.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <title>Endurance Fuel Planner</title>
+</head>
+<body>
+<header class="topbar">
+  <div><h1>Endurance Fuel Planner</h1><p>Økt, konkurranse og døgnenergi</p></div>
+  <div class="header-actions"><button id="installBtn" hidden>Installer</button><button id="exportBtn">Eksporter</button><label class="button">Importer<input id="importFile" type="file" accept="application/json" hidden></label></div>
+</header>
+<nav class="tabs" aria-label="Hovedmeny">
+  <button data-page="strategy" class="active">Strategi</button>
+  <button data-page="products">Produkter</button>
+  <button data-page="schedule">Inntaksplan</button>
+  <button data-page="analysis">Analyse</button>
+  <button data-page="day">Døgnmodell</button>
+</nav>
+<main>
+  <aside class="notice"><strong>Planleggingsverktøy:</strong> Beregningene er estimater, ikke medisinsk rådgivning. Test ernæringsstrategien gradvis på trening, og unngå å drikke mer enn svettetapet. Søk faglig hjelp ved sykdom, medisinbruk eller tidligere problemer med væske-/saltbalanse.</aside>
+
+  <section id="strategy" class="page active">
+    <div class="grid two">
+      <article class="card">
+        <h2>Utøver og modell</h2>
+        <div class="form-grid">
+          <label>Kroppsvekt <span><input id="weight" type="number" min="30" max="250" step="0.1"> kg</span></label>
+          <label>Startlager glykogen <span><input id="startGlycogen" type="number" min="100" max="1000"> g</span></label>
+          <label>Utnyttbar andel <span><input id="usableGlycogen" type="number" min="40" max="100"> %</span></label>
+          <label>Maks. karbohydratopptak <span><input id="absorption" type="number" min="20" max="150"> g/t</span></label>
+          <label>Svetterate <span><input id="sweatRate" type="number" min="0.1" max="3" step="0.05"> L/t</span></label>
+          <label>Natrium i svette <span><input id="sweatSodium" type="number" min="100" max="2500"> mg/L</span></label>
+          <label>Temperatur <span><input id="temperature" type="number" min="-20" max="50"> °C</span></label>
+          <label>Væskeerstatning <span><input id="fluidReplace" type="number" min="30" max="100"> %</span></label>
+        </div>
+        <p class="help">Glykogenlager, svetterate og opptak kan overstyres. Kjønn og alder er ikke nødvendige i selve øktmodellen.</p>
+      </article>
+      <article class="card">
+        <div class="row between"><div><h2>Økt eller konkurranse</h2><p class="help">Standard: halvmaraton i konkurransefart.</p></div><button id="addSegment">+ Øktdel</button></div>
+        <label>Navn på planen <input id="planName" type="text"></label>
+        <div id="segments"></div>
+        <div class="row wrap"><button id="savePlan" class="primary">Lagre plan</button><select id="savedPlans"></select><button id="loadPlan">Last inn</button><button id="deletePlan" class="danger">Slett</button></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="products" class="page">
+    <article class="card"><div class="row between"><div><h2>Produkter</h2><p class="help">Legg inn verdiene per gel, flaske, bar eller annen porsjon.</p></div><button id="addProduct">+ Produkt</button></div><div id="productsList" class="product-grid"></div></article>
+  </section>
+
+  <section id="schedule" class="page">
+    <article class="card"><div class="row between"><div><h2>Inntaksplan</h2><p class="help">Tidspunkt regnes fra start. Inntak vises i energigrafen.</p></div><button id="autoSchedule">Lag forslag</button></div><div id="intakes"></div><button id="addIntake">+ Inntak</button></article>
+  </section>
+
+  <section id="analysis" class="page">
+    <div id="warnings"></div><div id="summary" class="summary-grid"></div>
+    <article class="card"><h2>Tilgjengelig karbohydrat gjennom økten</h2><canvas id="fuelChart" width="1100" height="400"></canvas><div class="legend"><span class="green">● Tilgjengelig lager</span><span class="orange">● Inntak</span><span class="red">● Kritisk nivå</span></div><p class="help">Inntatt karbohydrat går først til en mage-/opptakskø. Maksimalt opptak per time begrenser hvor raskt det blir tilgjengelig.</p></article>
+    <article class="card"><h2>Delresultater</h2><div class="table-wrap"><table><thead><tr><th>Del</th><th>Tid</th><th>Energi</th><th>Karbohydrat</th><th>Væsketap</th><th>Natriumtap</th></tr></thead><tbody id="segmentResults"></tbody></table></div></article>
+  </section>
+
+  <section id="day" class="page">
+    <div class="grid two">
+      <article class="card"><h2>Døgnmodell</h2><p class="help">Separat oversikt som henter energi fra den aktive treningsplanen og egne hverdagsaktiviteter.</p>
+        <div class="form-grid">
+          <label>Hvileenergi/RMR <span><input id="rmr" type="number" min="800" max="4000"> kcal/døgn</span></label>
+          <label>Matens termiske effekt <span><input id="tef" type="number" min="0" max="20"> %</span></label>
+          <label>Ta med aktiv treningsplan <span><input id="includeWorkout" type="checkbox"></span></label>
+        </div>
+        <p class="help">RMR legges inn direkte for å unngå at kjønn eller en bestemt formel blir et krav. Bruk målt verdi eller et eksternt estimat.</p>
+      </article>
+      <article class="card"><div class="row between"><div><h2>Hverdagsaktiviteter</h2><p class="help">MET × kroppsvekt × tid gir estimert total aktivitetenergi.</p></div><button id="addDaily">+ Aktivitet</button></div><div id="dailyActivities"></div></article>
+    </div>
+    <div id="daySummary" class="summary-grid"></div>
+    <article class="card"><h2>Døgnets energikomponenter</h2><canvas id="dayChart" width="1100" height="320"></canvas></article>
+  </section>
+</main>
+<footer>Kjører lokalt og lagrer data på enheten. Versjon 1.0.</footer>
+<script src="app.js"></script>
+</body></html>
